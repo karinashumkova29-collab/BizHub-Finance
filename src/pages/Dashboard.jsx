@@ -102,7 +102,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
-          <p className="text-sm text-slate-500">Loading dashboard...</p>
+          <p className="text-sm text-slate-500">Loading BizHub Finance...</p>
         </div>
       </div>
     );
@@ -118,7 +118,7 @@ export default function Dashboard() {
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8"
         >
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">BizHub Finance</h1>
             <p className="text-sm text-slate-500 mt-1">Monitor your business performance</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
