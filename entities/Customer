@@ -1,0 +1,36 @@
+{
+  "name": "Customer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Customer name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Customer email"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Customer phone"
+    },
+    "acquired_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date customer was acquired"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active",
+      "description": "Customer status"
+    }
+  },
+  "required": [
+    "name",
+    "acquired_date"
+  ]
+}
