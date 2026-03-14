@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { appClient } from "@/api/appClient";
+import { useAuth } from "@/lib/AuthContext";
 import { motion } from "framer-motion";
 import { subDays, parseISO, isWithinInterval } from "date-fns";
-import { DollarSign, TrendingUp, Users, Plus, Loader2 } from "lucide-react";
+import { DollarSign, TrendingUp, Users, Plus, Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import StatCard from "@/components/dashboard/StatCard";
@@ -24,54 +25,55 @@ export default function Dashboard() {
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [showAddCustomer, setShowAddCustomer] = useState(false);
 
+  const { user, logout } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: allTransactions = [], isLoading: loadingTransactions } = useQuery({
-    queryKey: ["transactions"],
+    queryKey: ["transactions", user?.id],
     queryFn: async () => {
-  const { data, error } = await appClient
-    .from("transactions")
-    .select("*")
-    .order("date", { ascending: false });
-
-  if (error) throw error;
-  return data;
-}
+      const { data, error } = await appClient
+        .from("transactions")
+        .select("*")
+        .eq("user_id", user.id)          // Only this user's transactions
+        .order("date", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user
   });
 
   const { data: allCustomers = [], isLoading: loadingCustomers } = useQuery({
-    queryKey: ["customers"],
+    queryKey: ["customers", user?.id],
     queryFn: async () => {
-  const { data, error } = await appClient
-    .from("customers")
-    .select("*")
-    .order("acquired_date", { ascending: false });
-
-  if (error) throw error;
-  return data;
-}
+      const { data, error } = await appClient
+        .from("customers")
+        .select("*")
+        .eq("user_id", user.id)          // Only this user's customers
+        .order("acquired_date", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user
   });
 
   const createTransactionMutation = useMutation({
     mutationFn: async (data) => {
-  const { error } = await appClient
-    .from("transactions")
-    .insert([data]);
-
-  if (error) throw error;
-},
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"] })
+      const { error } = await appClient
+        .from("transactions")
+        .insert([{ ...data, user_id: user.id }]);  // Save with user_id
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions", user?.id] })
   });
 
   const createCustomerMutation = useMutation({
     mutationFn: async (data) => {
-  const { error } = await appClient
-    .from("customers")
-    .insert([data]);
-
-  if (error) throw error;
-},
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["customers"] })
+      const { error } = await appClient
+        .from("customers")
+        .insert([{ ...data, user_id: user.id }]);  // Save with user_id
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["customers", user?.id] })
   });
 
   // Filter transactions by date range
@@ -112,7 +114,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8"
@@ -123,24 +125,31 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <DateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />
-            <ExportButton 
-              transactions={transactions} 
+            <ExportButton
+              transactions={transactions}
               customers={allCustomers}
               dateRange={dateRange}
             />
+            <button
+              onClick={logout}
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Sign out
+            </button>
           </div>
         </motion.div>
 
         {/* Quick Actions */}
         <div className="flex gap-3 mb-8">
-          <Button 
+          <Button
             onClick={() => setShowAddTransaction(true)}
             className="bg-slate-900 hover:bg-slate-800 gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Transaction
           </Button>
-          <Button 
+          <Button
             onClick={() => setShowAddCustomer(true)}
             variant="outline"
             className="gap-2"

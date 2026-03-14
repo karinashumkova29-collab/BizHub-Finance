@@ -9,10 +9,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   useEffect(() => {
-    // Check current session on mount
     checkUserAuth();
 
-    // Listen for auth state changes (login/logout)
     const { data: { subscription } } = appClient.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setIsAuthenticated(!!session?.user);
@@ -43,7 +41,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const navigateToLogin = () => {
-    window.location.href = import.meta.env.VITE_LOGIN_URL || '/login';
+    window.location.href = '/login';
   };
 
   return (
@@ -51,12 +49,12 @@ export const AuthProvider = ({ children }) => {
       user,
       isAuthenticated,
       isLoadingAuth,
-      isLoadingPublicSettings: false, // no longer needed, kept for compatibility
-      authError: null,                // no longer needed, kept for compatibility
-      appPublicSettings: null,        // no longer needed, kept for compatibility
+      isLoadingPublicSettings: false,
+      authError: null,
+      appPublicSettings: null,
       logout,
       navigateToLogin,
-      checkAppState: checkUserAuth,   // alias for compatibility
+      checkAppState: checkUserAuth,
     }}>
       {children}
     </AuthContext.Provider>
